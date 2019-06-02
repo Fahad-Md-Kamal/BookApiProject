@@ -9,7 +9,6 @@ namespace BookApi.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
         
         [Required]
         [MaxLength(50, ErrorMessage="Category name must be in 50 characters in length")]

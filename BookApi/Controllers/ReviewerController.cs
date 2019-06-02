@@ -20,12 +20,6 @@ namespace BookApi.Controllers
             _ReviewerRepository = ReviewerRepository;
         }
 
-        //  bool ReviewerExists(int ReviewerId);********
-        //  ICollection<Reviewer> GetReviewers(); *******
-        //  Reviewer GetReviewer(int ReviewerId); *******
-        //  ICollection<Review> GetReviewsByReviewer(int ReviewerId);****
-        //  Reviewer GetReviewerByReview(int ReviewId);***********
-
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<ReviewerDto>))]
         [ProducesResponseType(400)]

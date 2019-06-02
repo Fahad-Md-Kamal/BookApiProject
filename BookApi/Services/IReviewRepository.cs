@@ -7,7 +7,7 @@ namespace BookApi.Services
     {
          bool ReviewExists(int ReviewId);
          ICollection<Review> GetReviews();
-         Review GetReview();
+         Review GetReview(int ReviewId);
          ICollection<Review> GetReviewsOfABook(int BookId);
          Book GetBookOfAReview(int ReviewId);
     }

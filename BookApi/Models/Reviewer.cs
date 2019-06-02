@@ -9,7 +9,6 @@ namespace BookApi.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
         
         [Required]
         [MaxLength(100, ErrorMessage = "First Name must be in 100 characters in length")]
