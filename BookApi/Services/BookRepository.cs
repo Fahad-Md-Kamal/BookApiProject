@@ -20,32 +20,40 @@ namespace BookApi.Services
 
         public bool BookExists(string BookIsbn)
         {
-            throw new System.NotImplementedException();
+            return _context.Books.Any(bk => bk.Isbn.Trim().ToUpper() == BookIsbn.Trim().ToUpper());
         }
 
         public Book GetBook(int BookId)
         {
-            throw new System.NotImplementedException();
+            return _context.Books.Where(bk => bk.Id == BookId).FirstOrDefault();
         }
 
         public Book GetBook(string BookIsbn)
         {
-            throw new System.NotImplementedException();
+            return _context.Books.Where(bk => bk.Isbn == BookIsbn).FirstOrDefault();
         }
 
         public decimal GetBookRating(int BookId)
         {
-            throw new System.NotImplementedException();
+            var reviews = _context.Reviews.Where(rv => rv.Book.Id == BookId);
+
+            if(reviews.Count() <= 0)
+                return 0;
+            
+            return (decimal)reviews.Sum(r => r.Rating)/reviews.Count();
         }
 
         public ICollection<Book> GetBooks()
         {
-            throw new System.NotImplementedException();
+            return _context.Books.OrderBy(b => b.Id).ToList();
         }
 
         public bool IsDuplicateISBN(int bookId, string bookIsbn)
         {
-            throw new System.NotImplementedException();
+            var book = _context.Books.Where(bk => bk.Isbn.Trim().ToUpper() == bookIsbn.Trim().ToUpper() 
+                                            && bk.Id != bookId)
+                                            .FirstOrDefault();
+            return book == null ? false : true;
         }
     }
 }
