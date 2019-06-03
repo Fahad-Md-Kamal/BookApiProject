@@ -18,12 +18,6 @@ namespace BookApi.Controllers
         }
 
 
-        //  bool AuthorExists(int AuthorId);
-        //  ICollection<Author> GetAuthors();***
-        //  Author GetAuthor(int AuthorId);*****
-        //  ICollection<Author> GetAuthorsOfABook(int BookId);*****
-        //  ICollection<Book> GetBooksByAuthor(int AuthorId);****
-
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<AuthorDto>))]
@@ -109,7 +103,7 @@ namespace BookApi.Controllers
 
 
 
-        [HttpGet("{AuthorId}/Book")]
+        [HttpGet("{AuthorId}/Books")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<BookDto>))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
