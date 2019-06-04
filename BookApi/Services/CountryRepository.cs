@@ -26,7 +26,7 @@ namespace BookApi.Services
 
         public ICollection<Country> GetCountries()
         {
-            return _Context.Countries.OrderBy(c => c.Name).ToList();
+            return _Context.Countries.OrderBy(c => c.Id).ToList();
         }
 
 
@@ -48,5 +48,28 @@ namespace BookApi.Services
             return Country == null ? false : true;
         }
 
+        public bool CreateCountry(Country county)
+        {
+            _Context.Add(county);
+            return Save();
+        }
+
+        public bool UpdateCountry(Country county)
+        {
+            _Context.Update(county);
+            return Save();
+        }
+
+        public bool DeleteCountry(Country county)
+        {
+            _Context.Remove(county);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            var saved = _Context.SaveChanges();
+            return saved >= 0 ? true : false;
+        }
     }
 }

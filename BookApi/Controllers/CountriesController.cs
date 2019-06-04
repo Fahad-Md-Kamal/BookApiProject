@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BookApi.Dtos;
+using BookApi.Models;
 using BookApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -50,7 +51,7 @@ namespace BookApi.Controllers
 
 
         // api/countries/countryId
-        [HttpGet("{CountryId}")]
+        [HttpGet("{CountryId}", Name = "GetCountry")]
         // It will return only the following request. Except these it will be regarded as and error.
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -81,7 +82,7 @@ namespace BookApi.Controllers
             return Ok(countryDto);
         }
 
-//TODO - Test This
+
         // api/countries/authors/authorId
         [HttpGet("authors/{authorId}")]
         // It will return only the following request. Except these it will be regarded as and error.
@@ -106,9 +107,7 @@ namespace BookApi.Controllers
                 Id = country.Id,
                 Name = country.Name
             };
-
             return Ok(countryDto);
-
         }
 
 
@@ -139,12 +138,116 @@ namespace BookApi.Controllers
                     LastName = author.LastName
                 });
             }
-
             return Ok(authorsDto);
+        }
+
+
+
+
+
+        [HttpPost]
+        [ProducesResponseType(201, Type = typeof(Country))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
+        [ProducesResponseType(500)]
+        public IActionResult CreateCountry([FromBody]Country CountryToCreate)
+        {
+            if(CountryToCreate == null)
+                return BadRequest(ModelState);
+
+            var Country = _countryRepository.GetCountries().Where(c => c.Name.Trim().ToUpper() == CountryToCreate.Name.Trim().ToUpper()).FirstOrDefault();
+
+            if(Country != null)
+            {
+                ModelState.AddModelError("",$"Country {CountryToCreate.Name} already exists");
+                // return StatusCode(422, ModelState); // User can use the error type and create a new custom message from the error type
+                return StatusCode(422, $"Country {CountryToCreate.Name} already exists"); // Custom message for the user
+            }
+
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if(!_countryRepository.CreateCountry(CountryToCreate))
+            {
+                ModelState.AddModelError("",$"Something went wrong saving {CountryToCreate.Name}");
+                return StatusCode(500, ModelState);
+            }
+
+
+            // return RedirectToAction("GetCountries");
+
+            return CreatedAtRoute("GetCountry", new { countryId = CountryToCreate.Id}, CountryToCreate);
 
         }
 
 
+        [HttpPut("{countryId}")]
+        [ProducesResponseType(204)] // no content
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
+        [ProducesResponseType(500)]
+        public IActionResult UpdateCountry(int countryId, [FromBody]Country CountryToUpdate)
+        {
+            if(CountryToUpdate == null)
+                return BadRequest(ModelState);
+            
+            if(countryId != CountryToUpdate.Id)
+                return BadRequest(ModelState);
+
+            if(!_countryRepository.CountryExists(countryId))
+                return NotFound();
+            
+            if(_countryRepository.IsDuplicateCountry(countryId, CountryToUpdate.Name))
+            {
+                ModelState.AddModelError("", $"Country {CountryToUpdate.Name} already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState); 
+
+            if(!_countryRepository.UpdateCountry(CountryToUpdate))
+            {
+                ModelState.AddModelError("",$"Something went wrong updating {CountryToUpdate.Name}");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+            // return CreatedAtRoute("GetCountry", new { countryId = CountryToUpdate.Id}, CountryToUpdate);
+        }
+
+
+        [HttpDelete("{countryId}")]
+        [ProducesResponseType(204)] // no content
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(409)] // Conflict
+        [ProducesResponseType(422)]
+        [ProducesResponseType(500)]
+        public IActionResult DeleteCountry(int countryId)
+        {
+            if(!_countryRepository.CountryExists(countryId))
+                return NotFound();
+            
+            var countryToDelete = _countryRepository.GetCountry(countryId);
+
+            if(_countryRepository.GetAuthorsFromACountry(countryId).Count() > 0)
+            {
+                ModelState.AddModelError("",$"Country {countryToDelete.Name} cannot be deleted since it is used by other author(s)");
+                return StatusCode(409, ModelState);
+            }
+
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState); 
+            
+             if(!_countryRepository.DeleteCountry(countryToDelete))
+            {
+                ModelState.AddModelError("",$"Something went wrong updating {countryToDelete.Name}");
+                return StatusCode(500, ModelState);
+            }           
+            return NoContent();
+        }
 
 
     }
