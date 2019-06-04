@@ -13,5 +13,10 @@ namespace BookApi.Services
          bool CategoryExists(int CategoryId);
          bool IsDuplicateCategory(int CategoryId, string CategoryName);
 
+         bool CreateCategory(Category category);
+         bool UpdateCategory(Category category);
+         bool DeleteCategory(Category category);
+         bool Save();
+
     }
 }

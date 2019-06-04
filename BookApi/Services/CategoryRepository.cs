@@ -27,7 +27,7 @@ namespace BookApi.Services
 
         public ICollection<Category> GetCategories()
         {
-            return _Context.Categories.OrderBy(c => c.Name).ToList();
+            return _Context.Categories.OrderBy(c => c.Id).ToList();
         }
 
         public ICollection<Category> GetAllCategoriesForABook(int BookId)
@@ -45,6 +45,30 @@ namespace BookApi.Services
             var Category = _Context.Categories.Where(c => c.Name.Trim().ToUpper() == CategoryName.Trim().ToUpper() 
                                                     && c.Id != CategoryId).FirstOrDefault();
             return Category == null ? false : true;
+        }
+
+        public bool CreateCategory(Category category)
+        {
+            _Context.Add(category); 
+            return Save(); 
+        }
+
+        public bool UpdateCategory(Category category)
+        {
+            _Context.Update(category);
+            return Save();
+        }
+
+        public bool DeleteCategory(Category category)
+        {
+            _Context.Remove(category);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            var savedChanges = _Context.SaveChanges();
+            return savedChanges >= 0 ? true : false; 
         }
     }
 }

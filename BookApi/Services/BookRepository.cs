@@ -50,9 +50,7 @@ namespace BookApi.Services
 
         public bool IsDuplicateISBN(int bookId, string bookIsbn)
         {
-            var book = _context.Books.Where(bk => bk.Isbn.Trim().ToUpper() == bookIsbn.Trim().ToUpper() 
-                                            && bk.Id != bookId)
-                                            .FirstOrDefault();
+            var book = _context.Books.Where(bk => bk.Isbn.Trim().ToUpper() == bookIsbn.Trim().ToUpper()&& bk.Id != bookId).FirstOrDefault();
             return book == null ? false : true;
         }
     }

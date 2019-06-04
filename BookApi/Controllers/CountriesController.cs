@@ -148,7 +148,7 @@ namespace BookApi.Controllers
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(Country))]
         [ProducesResponseType(400)]
-        [ProducesResponseType(422)]
+        [ProducesResponseType(422)] // Conflict data
         [ProducesResponseType(500)]
         public IActionResult CreateCountry([FromBody]Country CountryToCreate)
         {
@@ -172,12 +172,8 @@ namespace BookApi.Controllers
                 ModelState.AddModelError("",$"Something went wrong saving {CountryToCreate.Name}");
                 return StatusCode(500, ModelState);
             }
-
-
             // return RedirectToAction("GetCountries");
-
             return CreatedAtRoute("GetCountry", new { countryId = CountryToCreate.Id}, CountryToCreate);
-
         }
 
 
@@ -241,7 +237,7 @@ namespace BookApi.Controllers
             if(!ModelState.IsValid)
                 return BadRequest(ModelState); 
             
-             if(!_countryRepository.DeleteCountry(countryToDelete))
+            if(!_countryRepository.DeleteCountry(countryToDelete))
             {
                 ModelState.AddModelError("",$"Something went wrong updating {countryToDelete.Name}");
                 return StatusCode(500, ModelState);
