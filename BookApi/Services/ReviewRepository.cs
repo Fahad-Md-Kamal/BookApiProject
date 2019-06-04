@@ -24,7 +24,7 @@ namespace BookApi.Services
 
         public ICollection<Review> GetReviews()
         {
-            return _Context.Reviews.OrderBy(rv => rv.Rating).ToList();
+            return _Context.Reviews.OrderByDescending(rv => rv.Rating).ToList();
         }
 
         public ICollection<Review> GetReviewsOfABook(int BookId)
@@ -38,5 +38,31 @@ namespace BookApi.Services
         {
             return _Context.Reviews.Any(rv => rv.Id == ReviewId);
         }
+
+        public bool CreateReview(Review review)
+        {
+            _Context.Add(review);
+            return Save();
+        }
+
+        public bool UpdateReview(Review review)
+        {
+            _Context.Update(review);
+            return Save();
+        }
+
+        public bool DeleteReview(Review review)
+        {
+            _Context.Remove(review);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            var SavedItem = _Context.SaveChanges();
+
+            return SavedItem >= 0 ? true : false;
+        }
+        
     }
 }

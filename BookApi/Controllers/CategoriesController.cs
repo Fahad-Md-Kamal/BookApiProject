@@ -146,7 +146,7 @@ namespace BookApi.Controllers
             if(category != null)
             {
                 ModelState.AddModelError("", $"Category {categoryToBeCreated.Name} already exists");
-                return StatusCode(422, ModelState);
+                return StatusCode(422, ModelState); // Duplicate object Response
             }
 
             if(!ModelState.IsValid)
@@ -159,7 +159,7 @@ namespace BookApi.Controllers
             }
             return CreatedAtRoute("GetCategory", new {categoryId = categoryToBeCreated.Id}, categoryToBeCreated);
         }
-
+ 
 
 
         
@@ -183,7 +183,7 @@ namespace BookApi.Controllers
             if(_CategoryRepository.IsDuplicateCategory(CategoryId, categoryToBeUpdated.Name))
             {
                 ModelState.AddModelError("",$"Category {categoryToBeUpdated.Name} already exists");
-                return StatusCode(422);
+                return StatusCode(422, ModelState); // Duplicate object response
             }
 
             if(!ModelState.IsValid)
@@ -194,7 +194,6 @@ namespace BookApi.Controllers
                 ModelState.AddModelError("", $"Something went wrong while creating category {categoryToBeUpdated.Name}");
                 return StatusCode(500,ModelState);
             }
-
             return NoContent();
         }
 
@@ -205,7 +204,7 @@ namespace BookApi.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        [ProducesResponseType(422)]
+        [ProducesResponseType(409)]
         [ProducesResponseType(500)]
         public IActionResult DeleteCategory(int CategoryId)
         {
@@ -217,7 +216,7 @@ namespace BookApi.Controllers
             if(_CategoryRepository.GetAllBooksForACatagory(CategoryId).Count() > 0)
             {
                 ModelState.AddModelError("", $"Category {categoryToBeDeleted.Name} already used by other book(s)");
-                return StatusCode(409, ModelState);
+                return StatusCode(409, ModelState); // conflict object 
             }
 
             if(!ModelState.IsValid)

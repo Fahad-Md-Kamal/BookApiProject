@@ -10,5 +10,11 @@ namespace BookApi.Services
          Review GetReview(int ReviewId);
          ICollection<Review> GetReviewsOfABook(int BookId);
          Book GetBookOfAReview(int ReviewId);
+
+
+         bool CreateReview(Review review);
+         bool UpdateReview(Review review);
+         bool DeleteReview(Review review);
+         bool Save();
     }
 }
