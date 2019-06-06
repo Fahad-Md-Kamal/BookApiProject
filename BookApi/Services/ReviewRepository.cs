@@ -63,6 +63,11 @@ namespace BookApi.Services
 
             return SavedItem >= 0 ? true : false;
         }
-        
+
+        public bool DeleteReviews(List<Review> reviews)
+        {
+            _Context.RemoveRange(reviews);
+            return Save();
+        }
     }
 }
