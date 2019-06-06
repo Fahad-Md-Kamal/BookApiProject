@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using BookApi.Dtos;
+using BookApi.Models;
 using BookApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,8 +13,10 @@ namespace BookApi.Controllers
     {
         private readonly IAuthorRepository _AuthorRepository;
         private readonly IBookRepository _BookRepository;
-        public AuthorsController(IAuthorRepository AuthorRepository, IBookRepository BookRepository)
+        private readonly ICountryRepository _countryRepository;
+        public AuthorsController(IAuthorRepository AuthorRepository, IBookRepository BookRepository, ICountryRepository countryRepository)
         {
+            _countryRepository = countryRepository;
             _BookRepository = BookRepository;
             _AuthorRepository = AuthorRepository;
         }
@@ -46,7 +50,7 @@ namespace BookApi.Controllers
 
 
 
-        [HttpGet("{AuthorId}")]
+        [HttpGet("{AuthorId}", Name= "GetAuthor")]
         [ProducesResponseType(200, Type = typeof(AuthorDto))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -130,6 +134,114 @@ namespace BookApi.Controllers
                 });
             }
             return Ok(booksDto);
+        }
+
+
+
+
+
+        [HttpPost]
+        [ProducesResponseType(201,Type=typeof(Author))]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(422)]
+        [ProducesResponseType(500)]
+        public IActionResult CreateAuthor([FromBody]Author authorToCreate)
+        {
+            if (authorToCreate == null)
+                return BadRequest(ModelState);
+            
+            if(!_countryRepository.CountryExists(authorToCreate.Country.Id))
+            {
+                ModelState.AddModelError("","Country doesn't exist!");
+                return StatusCode(404, ModelState);
+            }
+            authorToCreate.Country = _countryRepository.GetCountry(authorToCreate.Country.Id);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_AuthorRepository.CreateAuthor(authorToCreate))
+            {
+                ModelState.AddModelError("", $"Somthing went wrong while creating author {authorToCreate.FirstName} {authorToCreate.LastName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return CreatedAtRoute("GetAuthor", new {authorId = authorToCreate.Id}, authorToCreate);
+
+        }
+
+
+
+
+
+        [HttpPut("{authorId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult UpdateAuthor(int authorId, [FromBody]Author authorToUpdate)
+        {
+            if (authorToUpdate == null)
+                return BadRequest(ModelState);
+
+            if(authorId != authorToUpdate.Id)
+                return BadRequest(ModelState);
+
+            if(!_AuthorRepository.AuthorExists(authorId))
+                ModelState.AddModelError("","Author doesn't exist");
+            
+            if(!_countryRepository.CountryExists(authorToUpdate.Country.Id))
+                ModelState.AddModelError("","Country doesn't exist!");
+            
+             if (!ModelState.IsValid)
+                return StatusCode(404,ModelState);           
+            
+            authorToUpdate.Country = _countryRepository.GetCountry(authorToUpdate.Country.Id);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_AuthorRepository.UpdateAuthor(authorToUpdate))
+            {
+                ModelState.AddModelError("", $"Somthing went wrong while updating author {authorToUpdate.FirstName} {authorToUpdate.LastName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+        }
+
+
+
+        [HttpDelete("{AuthorId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(409)]
+        [ProducesResponseType(500)]
+        public IActionResult DeleteAuthor(int AuthorId)
+        {
+            if(!_AuthorRepository.AuthorExists(AuthorId))
+                return NotFound();
+            
+            var authorToDelete = _AuthorRepository.GetAuthor(AuthorId);
+
+            if(_AuthorRepository.GetBooksByAuthor(AuthorId).Count() > 0)
+            {
+                ModelState.AddModelError("", $"Author {authorToDelete.FirstName} {authorToDelete.LastName} is associated with book(s)");
+                return StatusCode(409, ModelState);
+            }
+
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            if(!_AuthorRepository.DeleteAuthor(authorToDelete))
+            {
+                ModelState.AddModelError("",$"Something went wrong while deleteing author {authorToDelete.FirstName} {authorToDelete.LastName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
         }
 
     }

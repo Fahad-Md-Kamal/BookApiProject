@@ -10,5 +10,10 @@ namespace BookApi.Services
          Author GetAuthor(int AuthorId);
          ICollection<Author> GetAuthorsOfABook(int BookId);
          ICollection<Book> GetBooksByAuthor(int AuthorId); 
+
+         bool CreateAuthor(Author authorToCreate);
+         bool UpdateAuthor(Author authorToUpdate);
+         bool DeleteAuthor(Author authorToDelete);
+         bool Save();
     }
 }
